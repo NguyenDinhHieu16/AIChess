@@ -207,11 +207,6 @@ class Game:
         print("Move visited:", move_visited)
         print("Score:", present_score)
         print(best_move)
-    
-    def setPresent_move(self):
-        if human_first == True:
-            present_move = move
-
 
 class Bot:
     MAX_DEPTH = 0
