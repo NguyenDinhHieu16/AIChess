@@ -34,11 +34,14 @@ class GUI:
                 row.append(sg.Text("Score: "))
                 row.append(sg.Text(size=(20,1), key='-OUTPUT1-'))
             if (i == 5):
-                row.append(sg.Text("Dia chi o: "))
+                row.append(sg.Text("Dia chi o truoc: "))
                 row.append(sg.Text(size=(20,1), key='-OUTPUT2-'))
             if (i == 4):
-                row.append(sg.Text("Hash: "))
+                row.append(sg.Text("Dia chi o sau: "))
                 row.append(sg.Text(size=(20,1), key='-OUTPUT3-'))
+            if (i == 3):
+                row.append(sg.Text("Hash: "))
+                row.append(sg.Text(size=(20,1), key='-OUTPUT4-'))
             board_layout.append(row)
         row = [sg.Text(" ")]
         for i in range(8):
@@ -54,8 +57,9 @@ class GUI:
                     piece_image = cf.images[board.piece_at(i * 8 + j).symbol()]
                 window[(i, j)].update(image_filename=piece_image)
         window['-OUTPUT1-'].update(present_score)
-        window['-OUTPUT2-'].update("abc")
-        window['-OUTPUT3-'].update(present_hash)
+        window['-OUTPUT2-'].update(prev_move)
+        window['-OUTPUT3-'].update(present_move)
+        window['-OUTPUT4-'].update(present_hash)
     def change_square_selected(self, window, position):
         if (position[0] + position[1]) % 2 == 0:
             color = cf.selected_dark_color
@@ -151,7 +155,11 @@ class Game:
                                       to_square=chess.square(event[1], event[0]))
                 if board.is_legal(move):
                     print("-------HUMAN--------")
-                    global present_score, present_hash
+                    global present_score, present_hash, present_move, prev_move
+                    moveS = str(move)
+                    present_move = moveS[2:4]
+                    prev_move = moveS[0:2]
+
                     score = bot.calculate_score(move)
                     hash = bot.calculate_hash(move)
                     present_score += score
@@ -177,7 +185,7 @@ class Game:
             gui.restore_square_color(window, self.position)
     def bot_turn(self):
         print("--------BOT---------")
-        global present_score, hit, move_visited, present_hash
+        global present_score, hit, move_visited, present_hash, present_move, prev_move
         move_visited = 0
         hit = 0
         # bot.d.clear()
@@ -187,6 +195,9 @@ class Game:
         hash = bot.calculate_hash(best_move)
         present_score += score
         present_hash ^= hash
+        best_moveS = str(best_move)
+        present_move = best_moveS[2:4]
+        prev_move = best_moveS[0:2]
         board.push(best_move)
         gui.update_board(window)
         self.is_human_turn = True
@@ -196,6 +207,12 @@ class Game:
         print("Move visited:", move_visited)
         print("Score:", present_score)
         print(best_move)
+    
+    def setPresent_move(self):
+        if human_first == True:
+            present_move = move
+
+
 class Bot:
     MAX_DEPTH = 0
     table = []
