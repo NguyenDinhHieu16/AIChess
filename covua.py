@@ -108,6 +108,10 @@ class GUI:
         if (e == sg.WIN_CLOSED):
             mess_window.close()
 
+    def set_legal_move(self, i, j):
+        print("legal move : ", i, " ", j, "\n")
+        # Todo
+        # i , j : tọa độ của nước đi hợp lệ
 
 class Game:
     is_human_turn = True
@@ -152,18 +156,26 @@ class Game:
                 else:
                     gui.message("Draw!")
                 return
-    def set_legal_move(self,i,j):
-        print("11231231adsasd23")
+
+    def set_legal_move(self):
+        for i in range(0, 7, 1):
+            for j in range(0, 7, 1):
+                move = chess.Move(from_square=chess.square(self.position[1], self.position[0]),
+                                  to_square=chess.square(i, j))
+                if (board.is_legal(move)):
+                    GUI.set_legal_move(self,i, j)
+
     def human_turn(self, event):
         if (not self.selected) and self.piece_at(event) != None:
             self.selected = True
             self.position = event
-
-
+            Game.set_legal_move(self)
         elif self.selected:
             if event == self.position:
                 self.selected = False
+                print("2")
             else:
+                Game.set_legal_move(self)
                 if event[0] in self.PROMOTE_RANK and self.piece_at(self.position) == chess.PAWN:
                     move = chess.Move(from_square=chess.square(self.position[1], self.position[0]),
                                       to_square=chess.square(event[1], event[0]),
@@ -198,13 +210,17 @@ class Game:
                     self.is_human_turn = False
                 else:
                     if self.piece_at(event) == None:
+                        print(4)
                         self.selected = False
                     else:
+                        print(5)
                         gui.restore_square_color(window, self.position)
                         self.position = event
         if self.selected:
+            Game.set_legal_move(self)
             gui.change_square_selected(window, self.position)
         else:
+            print(7)
             gui.restore_square_color(window, self.position)
 
     def bot_turn(self):
