@@ -7,21 +7,26 @@ import timeit
 from operator import itemgetter
 import random
 
+
 class GUI:
     x = 1000
 
     def render_square(self, image, key, location):
+        # location: vi tri
         if (location[0] + location[1]) % 2 == 0:
             color = cf.dark_color
+            # o den
         else:
             color = cf.light_color
+
         return sg.Button('', image_filename=image,
                          border_width=0, button_color=color,
                          pad=(0, 0), key=key)
+
     def create_board_layout(self):
         board_layout = []
         for i in range(7, -1, -1):
-            row = [sg.Text(text=str(i+1), justification='center')]
+            row = [sg.Text(text=str(i + 1), justification='center')]
             #
             for j in range(0, 8):
                 if (board.piece_at(i * 8 + j) == None):
@@ -32,22 +37,23 @@ class GUI:
                 row.append(self.render_square(piece_image, key=(i, j), location=(i, j)))
             if (i == 6):
                 row.append(sg.Text("Score: "))
-                row.append(sg.Text(size=(20,1), key='-OUTPUT1-'))
+                row.append(sg.Text(size=(20, 1), key='-OUTPUT1-'))
             if (i == 5):
                 row.append(sg.Text("Dia chi o truoc: "))
-                row.append(sg.Text(size=(20,1), key='-OUTPUT2-'))
+                row.append(sg.Text(size=(20, 1), key='-OUTPUT2-'))
             if (i == 4):
                 row.append(sg.Text("Dia chi o sau: "))
-                row.append(sg.Text(size=(20,1), key='-OUTPUT3-'))
+                row.append(sg.Text(size=(20, 1), key='-OUTPUT3-'))
             if (i == 3):
                 row.append(sg.Text("Hash: "))
-                row.append(sg.Text(size=(20,1), key='-OUTPUT4-'))
+                row.append(sg.Text(size=(20, 1), key='-OUTPUT4-'))
             board_layout.append(row)
         row = [sg.Text(" ")]
         for i in range(8):
             row.append(sg.Text(chr(ord('a') + i), size=(7, 1), justification='center', pad=(0, 0)))
         board_layout.append(row)
         return board_layout
+
     def update_board(self, window):
         for i in range(8):
             for j in range(8):
@@ -60,6 +66,7 @@ class GUI:
         window['-OUTPUT2-'].update(prev_move)
         window['-OUTPUT3-'].update(present_move)
         window['-OUTPUT4-'].update(present_hash)
+
     def change_square_selected(self, window, position):
         if (position[0] + position[1]) % 2 == 0:
             color = cf.selected_dark_color
@@ -73,14 +80,15 @@ class GUI:
         else:
             color = cf.light_color
         window[position].update(button_color=color)
+
     def choose_piece_promotion(self):
         choose_layout = []
         row = []
         pie_choosed = 5
         for i in range(2, 6):
-            row.append(sg.Button('', image_filename=cf.PIECE_PROMOTION[i-2], size=(1, 1),
-                                          border_width=0, button_color=cf.light_color,
-                                          pad=(0, 0), key=i))
+            row.append(sg.Button('', image_filename=cf.PIECE_PROMOTION[i - 2], size=(1, 1),
+                                 border_width=0, button_color=cf.light_color,
+                                 pad=(0, 0), key=i))
         choose_layout.append(row)
         choose_window = sg.Window("Choose Piece to Promotion", choose_layout)
         e, v = choose_window.read()
@@ -90,6 +98,7 @@ class GUI:
             pie_choosed = e
         choose_window.close()
         return pie_choosed
+
     def message(self, mess):
         mess_layout = []
         text_mess = [sg.Text(text=mess, pad=(30, 20))]
@@ -98,30 +107,38 @@ class GUI:
         e, v = mess_window.read()
         if (e == sg.WIN_CLOSED):
             mess_window.close()
+
+
 class Game:
     is_human_turn = True
     selected = False
     position = (0, 0)
     PROMOTE_RANK = [0, 7]
+
     def __init__(self, is_human_turn):
         self.is_human_turn = is_human_turn
+
     def piece_at(self, pos):
         return board.piece_type_at(pos[0] * 8 + pos[1])
+
     def calc_piece_quantity(self):
         global board
         piece_quantity = 0
         for i in range(8):
             for j in range(8):
-                if board.piece_type_at(i*8+j) != None:
+                if board.piece_type_at(i * 8 + j) != None:
                     piece_quantity += 1
         # print(piece_quantity)
         return piece_quantity
+
     def play(self, event):
         if self.is_human_turn: self.human_turn(event)
         if not self.is_human_turn:
             if board.legal_moves.count() == 0:
-                if board.is_checkmate(): gui.message("You Win!")
-                else: gui.message("Draw!")
+                if board.is_checkmate():
+                    gui.message("You Win!")
+                else:
+                    gui.message("Draw!")
                 return
             print("Piece quantity: ", game.calc_piece_quantity())
             if game.calc_piece_quantity() == 7 or game.calc_piece_quantity() == 8:
@@ -130,13 +147,19 @@ class Game:
             self.bot_turn()
             print(board.fen())
             if board.legal_moves.count() == 0:
-                if board.is_checkmate(): gui.message("You Lose!")
-                else: gui.message("Draw!")
+                if board.is_checkmate():
+                    gui.message("You Lose!")
+                else:
+                    gui.message("Draw!")
                 return
+    def set_legal_move(self,i,j):
+        print("1")
     def human_turn(self, event):
         if (not self.selected) and self.piece_at(event) != None:
             self.selected = True
             self.position = event
+
+
         elif self.selected:
             if event == self.position:
                 self.selected = False
@@ -183,6 +206,7 @@ class Game:
             gui.change_square_selected(window, self.position)
         else:
             gui.restore_square_color(window, self.position)
+
     def bot_turn(self):
         print("--------BOT---------")
         global present_score, hit, move_visited, present_hash, present_move, prev_move
@@ -208,6 +232,7 @@ class Game:
         print("Score:", present_score)
         print(best_move)
 
+
 class Bot:
     MAX_DEPTH = 0
     table = []
@@ -216,17 +241,19 @@ class Bot:
     recent_use = dict()
     # list of move that should be search first
     pv_move = dict()
+
     def init_zobrist(self):
         check = []
         for i in range(12):
             self.table.append([])
         for i in range(12):
             for j in range(64):
-                rand_num = random.randrange(1<<64 - 1)
+                rand_num = random.randrange(1 << 64 - 1)
                 while rand_num in check:
-                    rand_num = random.randrange(1<<64 - 1)
+                    rand_num = random.randrange(1 << 64 - 1)
                 check.append(rand_num)
                 self.table[i].append(rand_num)
+
     def get_hash(self, board: chess.Board):
         h = 0
         for i in range(64):
@@ -234,6 +261,7 @@ class Bot:
                 h = h ^ self.table[cf.piece[board.piece_at(i).symbol()]][i]
         h = h ^ board.turn
         return h
+
     def calculate_hash(self, move: chess.Move):
         hash = 0
         from_square = move.from_square
@@ -253,37 +281,42 @@ class Bot:
                 hash = hash ^ self.table[cf.piece[board.piece_at(from_square + 3).symbol()]][from_square + 3]
                 hash = hash ^ self.table[cf.piece[board.piece_at(from_square + 3).symbol()]][from_square + 1]
         # Phong
-        elif (piece_at_from_square.piece_type == chess.PAWN) & ((to_square in range(56, 64)) or (to_square in range(0, 8))):
+        elif (piece_at_from_square.piece_type == chess.PAWN) & (
+                (to_square in range(56, 64)) or (to_square in range(0, 8))):
             hash = hash ^ self.table[cf.piece[piece_at_from_square.symbol()]][from_square]
             if (piece_at_to_square != None):
                 hash = hash ^ self.table[cf.piece[piece_at_to_square.symbol()]][to_square]
-            hash = hash ^ self.table[cf.piece[chess.Piece(piece_type=move.promotion, color=piece_at_from_square.color).symbol()]][to_square]
+            hash = hash ^ self.table[
+                cf.piece[chess.Piece(piece_type=move.promotion, color=piece_at_from_square.color).symbol()]][to_square]
         # An tot qua duong
-        elif (piece_at_from_square.piece_type == chess.PAWN) & (abs(from_square-to_square) in [7, 9]) & (piece_at_to_square == None):
+        elif (piece_at_from_square.piece_type == chess.PAWN) & (abs(from_square - to_square) in [7, 9]) & (
+                piece_at_to_square == None):
             hash = hash ^ self.table[cf.piece[piece_at_from_square.symbol()]][from_square]
             hash = hash ^ self.table[cf.piece[piece_at_from_square.symbol()]][to_square]
             if to_square > from_square:
-                hash = hash ^ self.table[cf.piece[board.piece_at(to_square-8).symbol()]][to_square - 8]
+                hash = hash ^ self.table[cf.piece[board.piece_at(to_square - 8).symbol()]][to_square - 8]
             else:
-                hash = hash ^ self.table[cf.piece[board.piece_at(to_square+8).symbol()]][to_square + 8]
+                hash = hash ^ self.table[cf.piece[board.piece_at(to_square + 8).symbol()]][to_square + 8]
         else:
             hash = hash ^ self.table[cf.piece[piece_at_from_square.symbol()]][from_square]
             hash = hash ^ self.table[cf.piece[piece_at_from_square.symbol()]][to_square]
             if piece_at_to_square != None:
                 hash = hash ^ self.table[cf.piece[piece_at_to_square.symbol()]][to_square]
         return hash ^ piece_at_from_square.color ^ (not piece_at_from_square.color)
-    def get_piece_score(self, piece : chess.Piece, pos):
+
+    def get_piece_score(self, piece: chess.Piece, pos):
         if piece == None:
             return 0
         symbol = piece.symbol().lower()
         color = piece.color
-        row = int(pos/8)
-        col = pos%8
+        row = int(pos / 8)
+        col = pos % 8
         if color:  # color = WHITE
             return cf.piece_score[symbol] + cf.piece_position_score[symbol][7 - row][col]
         else:
             return -(cf.piece_score[symbol] + cf.piece_position_score[symbol][row][col])
-    def get_piece_score_without_position(self, piece : chess.Piece):
+
+    def get_piece_score_without_position(self, piece: chess.Piece):
         if piece == None:
             return 0
         symbol = piece.symbol().lower()
@@ -292,36 +325,40 @@ class Bot:
             return cf.piece_score[symbol]
         else:
             return -cf.piece_score[symbol]
-    def calculate_score_normal(self, move:chess.Move):
+
+    def calculate_score_normal(self, move: chess.Move):
         from_square = move.from_square
         to_square = move.to_square
         piece_at_from_square = board.piece_at(from_square)
         piece_at_to_square = board.piece_at(to_square)
         score = 0
         # Nhap thanh
-        if (piece_at_from_square.piece_type == chess.KING) & (abs(from_square-to_square) in range(2, 5)):
+        if (piece_at_from_square.piece_type == chess.KING) & (abs(from_square - to_square) in range(2, 5)):
             if from_square > to_square:
                 score -= self.get_piece_score(piece_at_from_square, from_square)
                 score += self.get_piece_score(piece_at_from_square, from_square - 2)
-                score -= self.get_piece_score(board.piece_at(from_square-4), from_square - 4)
-                score += self.get_piece_score(board.piece_at(from_square-4), from_square - 1)
+                score -= self.get_piece_score(board.piece_at(from_square - 4), from_square - 4)
+                score += self.get_piece_score(board.piece_at(from_square - 4), from_square - 1)
             else:
                 score -= self.get_piece_score(piece_at_from_square, from_square)
                 score += self.get_piece_score(piece_at_from_square, from_square + 2)
                 score -= self.get_piece_score(board.piece_at(from_square + 3), from_square + 3)
                 score += self.get_piece_score(board.piece_at(from_square + 3), from_square + 1)
         # Phong
-        elif (piece_at_from_square.piece_type == chess.PAWN) & ((to_square in range(56, 64)) or (to_square in range(0, 8))):
+        elif (piece_at_from_square.piece_type == chess.PAWN) & (
+                (to_square in range(56, 64)) or (to_square in range(0, 8))):
             score -= self.get_piece_score(piece_at_from_square, from_square)
             score -= self.get_piece_score(piece_at_to_square, to_square)
-            score += self.get_piece_score(chess.Piece(piece_type=move.promotion, color=piece_at_from_square.color), to_square)
+            score += self.get_piece_score(chess.Piece(piece_type=move.promotion, color=piece_at_from_square.color),
+                                          to_square)
         # An tot qua duong
-        elif (piece_at_from_square.piece_type == chess.PAWN) & (abs(from_square - to_square) in [7, 9]) & (piece_at_to_square == None):
+        elif (piece_at_from_square.piece_type == chess.PAWN) & (abs(from_square - to_square) in [7, 9]) & (
+                piece_at_to_square == None):
             score -= self.get_piece_score(piece_at_from_square, from_square)
             score += self.get_piece_score(piece_at_from_square, to_square)
             if to_square > from_square:
                 score -= self.get_piece_score(board.piece_at(to_square - 8), to_square - 8)
-                #method 
+                # method
             else:
                 score -= self.get_piece_score(board.piece_at(to_square + 8), to_square + 8)
         else:
@@ -329,7 +366,8 @@ class Bot:
             score += self.get_piece_score(piece_at_from_square, to_square)
             score -= self.get_piece_score(piece_at_to_square, to_square)
         return score
-    def calculate_score_last_game(self, move:chess.Move):
+
+    def calculate_score_last_game(self, move: chess.Move):
         from_square = move.from_square
         to_square = move.to_square
         piece_at_from_square = board.piece_at(from_square)
@@ -356,20 +394,24 @@ class Bot:
                 if board.piece_at(i).color != piece_at_from_square.color:
                     king_pos = i
                     break
-        x_king = int(king_pos/8)
-        y_king = king_pos%8
+        x_king = int(king_pos / 8)
+        y_king = king_pos % 8
         prev_distance = abs(x_from - x_king) + abs(y_from - y_king)
         distance = abs(x_to - x_king) + abs(y_to - y_king)
-        if piece_at_from_square.color == True: value = 6
-        else: value = -6
-        return  (prev_distance - distance)*value - self.get_piece_score_without_position(piece_at_to_square)
+        if piece_at_from_square.color == True:
+            value = 6
+        else:
+            value = -6
+        return (prev_distance - distance) * value - self.get_piece_score_without_position(piece_at_to_square)
+
     def get_score(self, board):
         score = 0
         for i in range(8):
             for j in range(8):
-                pos = i*8+j
+                pos = i * 8 + j
                 score += self.get_piece_score(board.piece_at(pos), pos)
         return score
+
     def iterative_deepening(self):
         global human_first
         max_depth = 4
@@ -379,9 +421,9 @@ class Bot:
         else:
             self.calculate_score = self.calculate_score_normal
         start = timeit.default_timer()
-        for depth in range(2, max_depth+1):
+        for depth in range(2, max_depth + 1):
             self.MAX_DEPTH = depth
-            best_move = self.minimax(0, -800011, 800011, isMaxPlayer= not human_first)
+            best_move = self.minimax(0, -800011, 800011, isMaxPlayer=not human_first)
         end = timeit.default_timer()
         print("Time: ", end - start)
         # if best_move instanceof: print(1)
@@ -389,7 +431,8 @@ class Bot:
         if (type(best_move) is chess.Move) == False: return list(board.legal_moves)[0]
         if not board.is_legal(best_move): return list(board.legal_moves)[0]
         return best_move
-    def minimax(self, depth, alpha, beta, isMaxPlayer:bool):
+
+    def minimax(self, depth, alpha, beta, isMaxPlayer: bool):
         global present_score, hit, present_hash, move_visited
         if board.legal_moves.count() == 0:
             if board.is_checkmate():
@@ -414,7 +457,7 @@ class Bot:
                 else:
                     return value[0]
             else:
-            #     self.transpos_table.pop(present_hash)
+                #     self.transpos_table.pop(present_hash)
                 better_move = self.pv_move[present_hash].copy()
 
         possibleMove = board.legal_moves
@@ -425,7 +468,6 @@ class Bot:
             temp_score = self.calculate_score(move)
             temp_hash = self.calculate_hash(move)
             move_list.append((temp_score, temp_hash, move))
-            
 
         move_list.sort(key=itemgetter(0), reverse=isMaxPlayer)
 
@@ -489,7 +531,10 @@ class Bot:
     calculate_score = calculate_score_normal
 
 
-#MAIN
+# MAIN
+import os
+
+os.chdir('C:\\Users\\Admin\\Desktop\\COZE\\py\\py_CHESS_AI\\AIChess')
 gui = GUI()
 game = Game(is_human_turn=True)
 bot = Bot()
@@ -508,7 +553,7 @@ present_hash = bot.get_hash(board)
 hit = 0
 
 board_layout = gui.create_board_layout()
-window = sg.Window("Chess", board_layout, margins=(0,0))
+window = sg.Window("Chess", board_layout, margins=(0, 0))
 
 while True:
     event, values = window.read()
