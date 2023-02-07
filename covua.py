@@ -153,7 +153,7 @@ class Game:
                     gui.message("Draw!")
                 return
     def set_legal_move(self,i,j):
-        print("1123123123")
+        print("11231231adsasd23")
     def human_turn(self, event):
         if (not self.selected) and self.piece_at(event) != None:
             self.selected = True
